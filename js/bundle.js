@@ -1,16 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _globals = require('./globals');
 
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+var globals = _interopRequireWildcard(_globals);
 
-// Code goes here
-PIXI.loader.add('transparent', 'assets/transparent.png').load(setup);
+var _pencilTool = require('./tools/pencilTool');
 
-var currentColor = '#000000';
-var mmdown = false;
-var lmdown = false;
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 var canvas = document.createElement('canvas');
 var ctx = canvas.getContext('2d');
 var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
@@ -24,49 +22,18 @@ var ctx2 = c2.getContext('2d');
 
 document.body.appendChild(c2);
 
-var pencilTool = function () {
-  function pencilTool() {
-    _classCallCheck(this, pencilTool);
-  }
-
-  _createClass(pencilTool, [{
-    key: 'draw',
-    value: function draw(pos, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(pos.x, pos.y, 1, 1);
-    }
-  }, {
-    key: 'onLeftMouseDown',
-    value: function onLeftMouseDown(pos) {
-      this.draw(pos, currentColor);
-    }
-  }, {
-    key: 'onRightMouseDown',
-    value: function onRightMouseDown(pos) {
-      this.draw(pos, currentColor);
-    }
-  }, {
-    key: 'onMouseMove',
-    value: function onMouseMove(pos) {
-      if (lmdown) {
-        this.draw(pos, currentColor);
-      }
-    }
-  }]);
-
-  return pencilTool;
-}();
-
-var currentTool = new pencilTool();
+var currentTool = new _pencilTool.pencilTool(ctx);
 
 $('#mainColor').spectrum({
   showPalette: true,
   clickoutFiresChange: true,
   disabled: false,
   move: function move(color) {
-    currentColor = color.toHexString(); // #ff0000
+    globals.currentColor = color.toHexString(); // #ff0000
   }
 });
+
+setup();
 
 function setup() {
   canvas.width = c2.width = 20;
@@ -125,7 +92,7 @@ function setup() {
     var pos = floorPos(mouseData.data.getLocalPosition(sprite));
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      lmdown = true;
+      globals.lmdown = true;
       currentTool.onLeftMouseDown(pos);
     }
   };
@@ -139,7 +106,7 @@ function setup() {
     console.log(mouseData);
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 1) {
-      mmdown = true;
+      globals.mmdown = true;
       $('html').css({ cursor: '-webkit-grabbing' });
     }
   };
@@ -147,10 +114,10 @@ function setup() {
   container.mouseup = function (mouseData) {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      lmdown = false;
+      globals.lmdown = false;
     }
     if (downButton === 1) {
-      mmdown = false;
+      globals.mmdown = false;
       $('html').css({ cursor: 'default' });
     }
   };
@@ -158,14 +125,14 @@ function setup() {
   sprite.mouseup = function (mouseData) {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      lmdown = false;
+      globals.lmdown = false;
     }
   };
 
   container.mousemove = function (mouseData) {
     var origEvt = mouseData.data.originalEvent;
 
-    if (mmdown) {
+    if (globals.mmdown) {
       container.x += origEvt.movementX;
       container.y += origEvt.movementY;
     }
@@ -179,5 +146,76 @@ function animate() {
   renderer.render(container);
 }
 
-},{}]},{},[1])
+},{"./globals":2,"./tools/pencilTool":3}],2:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = {
+  currentColor: '#000',
+  mmdown: false,
+  lmdown: false
+};
+
+},{}],3:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.pencilTool = undefined;
+
+var _globals = require('../globals');
+
+var globals = _interopRequireWildcard(_globals);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var pencilTool = exports.pencilTool = function () {
+  function pencilTool(ctx) {
+    _classCallCheck(this, pencilTool);
+
+    this.ctx = ctx;
+  }
+
+  _createClass(pencilTool, [{
+    key: 'draw',
+    value: function draw(pos, color) {
+      this.ctx.fillStyle = color;
+      this.ctx.fillRect(pos.x, pos.y, 1, 1);
+    }
+  }, {
+    key: 'onLeftMouseDown',
+    value: function onLeftMouseDown(pos) {
+      this.draw(pos, globals.currentColor);
+    }
+  }, {
+    key: 'onRightMouseDown',
+    value: function onRightMouseDown(pos) {
+      this.draw(pos, globals.currentColor);
+    }
+  }, {
+    key: 'onLeftMouseUp',
+    value: function onLeftMouseUp() {}
+  }, {
+    key: 'onRightMouseUp',
+    value: function onRightMouseUp() {}
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(pos) {
+      if (globals.lmdown) {
+        this.draw(pos, globals.currentColor);
+      }
+    }
+  }]);
+
+  return pencilTool;
+}();
+
+},{"../globals":2}]},{},[1])
 //# sourceMappingURL=bundle.js.map
