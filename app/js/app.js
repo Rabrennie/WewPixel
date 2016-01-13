@@ -1,9 +1,6 @@
-// Code goes here
-PIXI.loader.add('transparent', 'assets/transparent.png').load(setup);
+import * as globals from './globals'
+import { pencilTool } from './tools/pencilTool';
 
-var currentColor = '#000000'
-var mmdown = false;
-var lmdown = false;
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d');
 var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
@@ -17,39 +14,19 @@ const ctx2 = c2.getContext('2d');
 
 document.body.appendChild(c2)
 
-class pencilTool {
-  constructor() {
 
-  }
-  draw(pos, color) {
-    ctx.fillStyle = color
-    ctx.fillRect(pos.x, pos.y,1,1);
-  }
-  onLeftMouseDown(pos) {
-    this.draw(pos, currentColor)
-  }
-  onRightMouseDown(pos) {
-    this.draw(pos, currentColor)
-  }
-  onMouseMove(pos) {
-    if(lmdown) {
-      this.draw(pos, currentColor)
-    }
-  }
-}
-
-
-const currentTool = new pencilTool();
+const currentTool = new pencilTool(ctx);
 
 $('#mainColor').spectrum({
   showPalette: true,
   clickoutFiresChange: true,
   disabled: false,
   move: (color) => {
-    currentColor= color.toHexString(); // #ff0000
+    globals.currentColor= color.toHexString(); // #ff0000
   }
 });
 
+setup()
 
 function setup() {
   canvas.width = c2.width = 20;
@@ -109,7 +86,7 @@ function setup() {
     const pos = floorPos(mouseData.data.getLocalPosition(sprite))
     var downButton = mouseData.data.originalEvent.button;
     if(downButton === 0) {
-      lmdown = true;
+      globals.lmdown = true;
       currentTool.onLeftMouseDown(pos);
     }
   }
@@ -123,7 +100,7 @@ function setup() {
     console.log(mouseData)
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 1) {
-      mmdown = true;
+      globals.mmdown = true;
       $('html').css({ cursor:'-webkit-grabbing' })
     }
   }
@@ -131,10 +108,10 @@ function setup() {
   container.mouseup = function(mouseData) {
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 0) {
-      lmdown = false;
+      globals.lmdown = false;
     }
     if(downButton === 1) {
-      mmdown = false;
+      globals.mmdown = false;
       $('html').css({ cursor:'default' })
     }
   }
@@ -142,14 +119,14 @@ function setup() {
   sprite.mouseup = function(mouseData) {
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 0) {
-      lmdown = false;
+      globals.lmdown = false;
     }
   }
 
   container.mousemove = function(mouseData) {
     var origEvt = mouseData.data.originalEvent;
 
-    if(mmdown) {
+    if(globals.mmdown) {
       container.x += origEvt.movementX;
       container.y += origEvt.movementY;
     }
