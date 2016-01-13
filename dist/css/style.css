@@ -1,0 +1,36 @@
+/* Styles go here */
+
+body {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+#mainColor {
+  z-index: 100;
+}
+
+.imgPreview {
+  position: absolute;
+  z-index: 100;
+  right:30px;
+  top:30px;
+  image-rendering: optimizeSpeed;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+  image-rendering: pixelated;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+
+.renderer {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.tools{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+}
