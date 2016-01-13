@@ -10,13 +10,36 @@ var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
 var container = new PIXI.Container();
 const docRenderer = document.body.appendChild(renderer.view);
 const docCanvas = document.body.appendChild(canvas);
-
+var sprite;
 
 const c2 = document.createElement('canvas')
 const ctx2 = c2.getContext('2d');
 
 document.body.appendChild(c2)
 
+class pencilTool {
+  constructor() {
+
+  }
+  draw(pos, color) {
+    ctx.fillStyle = color
+    ctx.fillRect(pos.x, pos.y,1,1);
+  }
+  onLeftMouseDown(pos) {
+    this.draw(pos, currentColor)
+  }
+  onRightMouseDown(pos) {
+    this.draw(pos, currentColor)
+  }
+  onMouseMove(pos) {
+    if(lmdown) {
+      this.draw(pos, currentColor)
+    }
+  }
+}
+
+
+const currentTool = new pencilTool();
 
 $('#mainColor').spectrum({
   showPalette: true,
@@ -29,10 +52,9 @@ $('#mainColor').spectrum({
 
 
 function setup() {
-  canvas.width = 20;
-  canvas.height = 20;
-  c2.width = 20;
-  c2.height= 20;
+  canvas.width = c2.width = 20;
+  canvas.height = c2.height = 20;
+
   console.log(PIXI.loader)
   ctx2.fillStyle = 'white'
   ctx2.fillRect(0,0,20,20);
@@ -56,7 +78,7 @@ function setup() {
   renderer.backgroundColor = 0xBABABA;
 
   console.log(container)
-  var sprite = new PIXI.Sprite(canvasTexture)
+  sprite = new PIXI.Sprite(canvasTexture)
   sprite.interactive = true;
 
   var tilingSprite = new PIXI.Sprite(c2text)
@@ -69,7 +91,7 @@ function setup() {
   container.y = renderer.height/2 - canvas.height*10;
   // add the renderer view element to the DOM
 
-  $(docCanvas).attr('class','renderer');
+  $(docRenderer).attr('class','renderer');
   $(docCanvas).css({ width:'80px' })
   $(docCanvas).attr('class','imgPreview');
 
@@ -79,27 +101,22 @@ function setup() {
   container.hitArea = new PIXI.Rectangle(-1000,-1000,2000,2000)
 
 
+  function floorPos(pos) {
+    return { x:Math.floor(pos.x), y:Math.floor(pos.y) };
+  }
+
   sprite.mousedown = function(mouseData) {
-    var lcp = mouseData.data.getLocalPosition(sprite);
-    var downButton = mouseData.data.originalEvent.button
+    const pos = floorPos(mouseData.data.getLocalPosition(sprite))
+    var downButton = mouseData.data.originalEvent.button;
     if(downButton === 0) {
       lmdown = true;
-      ctx.fillStyle = currentColor
-      ctx.fillRect(Math.floor(lcp.x),Math.floor(lcp.y),1,1);
-      sprite.texture.update()
-    } else if(downButton === 1) {
-      mmdown = true;
-      $(docRenderer).css({ cursor:'-webkit-grabbing' })
+      currentTool.onLeftMouseDown(pos);
     }
   }
 
   sprite.mousemove = function(mouseData) {
-    var lcp = mouseData.data.getLocalPosition(sprite);
-    if(lmdown) {
-      ctx.fillStyle = currentColor
-      ctx.fillRect(Math.floor(lcp.x),Math.floor(lcp.y),1,1);
-      sprite.texture.update()
-    }
+    const pos = floorPos(mouseData.data.getLocalPosition(sprite))
+    currentTool.onMouseMove(pos);
   }
 
   container.mousedown = function(mouseData) {
@@ -107,7 +124,7 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 1) {
       mmdown = true;
-      $(docRenderer).css({ cursor:'-webkit-grabbing' })
+      $('html').css({ cursor:'-webkit-grabbing' })
     }
   }
 
@@ -118,7 +135,7 @@ function setup() {
     }
     if(downButton === 1) {
       mmdown = false;
-      $(docRenderer).css({ cursor:'default' })
+      $('html').css({ cursor:'default' })
     }
   }
 
@@ -126,9 +143,6 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 0) {
       lmdown = false;
-    }
-    if(downButton === 1) {
-      mmdown = false;
     }
   }
 
@@ -145,6 +159,7 @@ function setup() {
 function animate() {
   requestAnimationFrame(animate);
   // render the stage
+  sprite.texture.update()
   renderer.render(container);
 
 }

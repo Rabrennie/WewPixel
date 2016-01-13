@@ -1,6 +1,10 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 // Code goes here
 PIXI.loader.add('transparent', 'assets/transparent.png').load(setup);
 
@@ -13,11 +17,47 @@ var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
 var container = new PIXI.Container();
 var docRenderer = document.body.appendChild(renderer.view);
 var docCanvas = document.body.appendChild(canvas);
+var sprite;
 
 var c2 = document.createElement('canvas');
 var ctx2 = c2.getContext('2d');
 
 document.body.appendChild(c2);
+
+var pencilTool = function () {
+  function pencilTool() {
+    _classCallCheck(this, pencilTool);
+  }
+
+  _createClass(pencilTool, [{
+    key: 'draw',
+    value: function draw(pos, color) {
+      ctx.fillStyle = color;
+      ctx.fillRect(pos.x, pos.y, 1, 1);
+    }
+  }, {
+    key: 'onLeftMouseDown',
+    value: function onLeftMouseDown(pos) {
+      this.draw(pos, currentColor);
+    }
+  }, {
+    key: 'onRightMouseDown',
+    value: function onRightMouseDown(pos) {
+      this.draw(pos, currentColor);
+    }
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(pos) {
+      if (lmdown) {
+        this.draw(pos, currentColor);
+      }
+    }
+  }]);
+
+  return pencilTool;
+}();
+
+var currentTool = new pencilTool();
 
 $('#mainColor').spectrum({
   showPalette: true,
@@ -29,10 +69,9 @@ $('#mainColor').spectrum({
 });
 
 function setup() {
-  canvas.width = 20;
-  canvas.height = 20;
-  c2.width = 20;
-  c2.height = 20;
+  canvas.width = c2.width = 20;
+  canvas.height = c2.height = 20;
+
   console.log(PIXI.loader);
   ctx2.fillStyle = 'white';
   ctx2.fillRect(0, 0, 20, 20);
@@ -56,7 +95,7 @@ function setup() {
   renderer.backgroundColor = 0xBABABA;
 
   console.log(container);
-  var sprite = new PIXI.Sprite(canvasTexture);
+  sprite = new PIXI.Sprite(canvasTexture);
   sprite.interactive = true;
 
   var tilingSprite = new PIXI.Sprite(c2text);
@@ -69,7 +108,7 @@ function setup() {
   container.y = renderer.height / 2 - canvas.height * 10;
   // add the renderer view element to the DOM
 
-  $(docCanvas).attr('class', 'renderer');
+  $(docRenderer).attr('class', 'renderer');
   $(docCanvas).css({ width: '80px' });
   $(docCanvas).attr('class', 'imgPreview');
 
@@ -78,27 +117,22 @@ function setup() {
   container.interactive = true;
   container.hitArea = new PIXI.Rectangle(-1000, -1000, 2000, 2000);
 
+  function floorPos(pos) {
+    return { x: Math.floor(pos.x), y: Math.floor(pos.y) };
+  }
+
   sprite.mousedown = function (mouseData) {
-    var lcp = mouseData.data.getLocalPosition(sprite);
+    var pos = floorPos(mouseData.data.getLocalPosition(sprite));
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
       lmdown = true;
-      ctx.fillStyle = currentColor;
-      ctx.fillRect(Math.floor(lcp.x), Math.floor(lcp.y), 1, 1);
-      sprite.texture.update();
-    } else if (downButton === 1) {
-      mmdown = true;
-      $(docRenderer).css({ cursor: '-webkit-grabbing' });
+      currentTool.onLeftMouseDown(pos);
     }
   };
 
   sprite.mousemove = function (mouseData) {
-    var lcp = mouseData.data.getLocalPosition(sprite);
-    if (lmdown) {
-      ctx.fillStyle = currentColor;
-      ctx.fillRect(Math.floor(lcp.x), Math.floor(lcp.y), 1, 1);
-      sprite.texture.update();
-    }
+    var pos = floorPos(mouseData.data.getLocalPosition(sprite));
+    currentTool.onMouseMove(pos);
   };
 
   container.mousedown = function (mouseData) {
@@ -106,7 +140,7 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 1) {
       mmdown = true;
-      $(docRenderer).css({ cursor: '-webkit-grabbing' });
+      $('html').css({ cursor: '-webkit-grabbing' });
     }
   };
 
@@ -117,7 +151,7 @@ function setup() {
     }
     if (downButton === 1) {
       mmdown = false;
-      $(docRenderer).css({ cursor: 'default' });
+      $('html').css({ cursor: 'default' });
     }
   };
 
@@ -125,9 +159,6 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
       lmdown = false;
-    }
-    if (downButton === 1) {
-      mmdown = false;
     }
   };
 
@@ -144,6 +175,7 @@ function setup() {
 function animate() {
   requestAnimationFrame(animate);
   // render the stage
+  sprite.texture.update();
   renderer.render(container);
 }
 
