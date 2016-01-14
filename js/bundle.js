@@ -289,4 +289,5 @@ module.exports = function(x0, y0, x1, y1, fn) {
   return arr;
 };
 
-},{}]},{},[1]);
+},{}]},{},[1])
+//# sourceMappingURL=bundle.js.map
