@@ -1,4 +1,5 @@
 import * as globals from '../globals'
+import bresenham from 'bresenham'
 
 export class pencilTool {
   constructor(ctx) {
@@ -10,17 +11,24 @@ export class pencilTool {
   }
   onLeftMouseDown(pos) {
     this.draw(pos, globals.currentColor)
+    this.oldPos = pos;
   }
   onRightMouseDown(pos) {
     this.draw(pos, globals.currentColor)
+    this.oldPos = pos;
   }
   onLeftMouseUp() {
+    this.oldPos = null;
   }
   onRightMouseUp() {
+    this.oldPos = null;
   }
   onMouseMove(pos) {
-    if(globals.lmdown) {
-      this.draw(pos, globals.currentColor)
+    if(globals.lmdown && (this.oldPos.x !== pos.x || this.oldPos.y !== pos.y)) {
+      for(const p of bresenham(this.oldPos.x, this.oldPos.y, pos.x, pos.y)) {
+        this.draw(p, globals.currentColor);
+      }
+      this.oldPos = pos;
     }
   }
 }
