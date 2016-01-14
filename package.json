@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Rabrennie/WewPixel#readme",
   "dependencies": {
+    "bresenham": "0.0.3"
   },
   "devDependencies": {
     "babel-eslint": "^4.0.0",
