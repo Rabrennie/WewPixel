@@ -1,22 +1,24 @@
-import * as globals from './globals'
+import globals from './globals'
 import { FillTool } from './tools/FillTool';
 import { PencilTool } from './tools/PencilTool';
+import { EraserTool } from './tools/EraserTool';
 
 const canvas = document.createElement('canvas'),
   ctx = canvas.getContext('2d'),
   renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
-  container = new PIXI.Container(),
+  container = globals.container,
   docRenderer = document.body.appendChild(renderer.view),
   docCanvas = document.body.appendChild(canvas),
   c2 = document.createElement('canvas'),
   ctx2 = c2.getContext('2d');
 
 let sprite,
-  currentTool = new FillTool(ctx);
+  currentTool = new EraserTool(ctx);
 
 document.body.appendChild(c2)
 
 $('#mainColor').spectrum({
+  color:globals.currentColor,
   showPalette: true,
   clickoutFiresChange: true,
   disabled: false,
@@ -31,6 +33,10 @@ $('#pencilBtn').click(() => {
 
 $('#fillBtn').click(() => {
   currentTool = new FillTool(ctx);
+})
+
+$('#eraserBtn').click(() => {
+  currentTool = new EraserTool(ctx);
 })
 
 setup()
@@ -61,7 +67,6 @@ function setup() {
   const c2text = PIXI.Texture.fromCanvas(c2);
   renderer.backgroundColor = 0xBABABA;
 
-  console.log(container)
   sprite = new PIXI.Sprite(canvasTexture)
   sprite.interactive = true;
 

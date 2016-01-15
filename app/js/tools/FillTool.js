@@ -1,5 +1,5 @@
 import { BaseTool } from './BaseTool';
-import * as globals from '../globals'
+import globals from '../globals'
 
 export class FillTool extends BaseTool {
   constructor(ctx) {
@@ -39,7 +39,7 @@ export class FillTool extends BaseTool {
       }
 
       thisPos.y += 1
-      
+
       while (thisPos.y < boundsBottom && this.matchStartColor(thisPos)) {
         this.draw(thisPos, globals.currentColor)
 

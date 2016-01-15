@@ -3,34 +3,37 @@
 
 var _globals = require('./globals');
 
-var globals = _interopRequireWildcard(_globals);
+var _globals2 = _interopRequireDefault(_globals);
 
 var _FillTool = require('./tools/FillTool');
 
 var _PencilTool = require('./tools/PencilTool');
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+var _EraserTool = require('./tools/EraserTool');
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var canvas = document.createElement('canvas'),
     ctx = canvas.getContext('2d'),
     renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
-    container = new PIXI.Container(),
+    container = _globals2.default.container,
     docRenderer = document.body.appendChild(renderer.view),
     docCanvas = document.body.appendChild(canvas),
     c2 = document.createElement('canvas'),
     ctx2 = c2.getContext('2d');
 
 var sprite = undefined,
-    currentTool = new _FillTool.FillTool(ctx);
+    currentTool = new _EraserTool.EraserTool(ctx);
 
 document.body.appendChild(c2);
 
 $('#mainColor').spectrum({
+  color: _globals2.default.currentColor,
   showPalette: true,
   clickoutFiresChange: true,
   disabled: false,
   move: function move(color) {
-    globals.currentColor = color.toHexString(); // #ff0000
+    _globals2.default.currentColor = color.toHexString(); // #ff0000
   }
 });
 
@@ -40,6 +43,10 @@ $('#pencilBtn').click(function () {
 
 $('#fillBtn').click(function () {
   currentTool = new _FillTool.FillTool(ctx);
+});
+
+$('#eraserBtn').click(function () {
+  currentTool = new _EraserTool.EraserTool(ctx);
 });
 
 setup();
@@ -70,7 +77,6 @@ function setup() {
   var c2text = PIXI.Texture.fromCanvas(c2);
   renderer.backgroundColor = 0xBABABA;
 
-  console.log(container);
   sprite = new PIXI.Sprite(canvasTexture);
   sprite.interactive = true;
 
@@ -101,7 +107,7 @@ function setup() {
     var pos = floorPos(mouseData.data.getLocalPosition(sprite));
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      globals.lmdown = true;
+      _globals2.default.lmdown = true;
       currentTool.onLeftMouseDown(pos);
     }
   };
@@ -115,7 +121,7 @@ function setup() {
     console.log(mouseData);
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 1) {
-      globals.mmdown = true;
+      _globals2.default.mmdown = true;
       $('html').css({ cursor: '-webkit-grabbing' });
     }
   };
@@ -123,10 +129,10 @@ function setup() {
   container.mouseup = function (mouseData) {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      globals.lmdown = false;
+      _globals2.default.lmdown = false;
     }
     if (downButton === 1) {
-      globals.mmdown = false;
+      _globals2.default.mmdown = false;
       $('html').css({ cursor: 'default' });
     }
   };
@@ -134,14 +140,14 @@ function setup() {
   sprite.mouseup = function (mouseData) {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
-      globals.lmdown = false;
+      _globals2.default.lmdown = false;
     }
   };
 
   container.mousemove = function (mouseData) {
     var origEvt = mouseData.data.originalEvent;
 
-    if (globals.mmdown) {
+    if (_globals2.default.mmdown) {
       container.x += origEvt.movementX;
       container.y += origEvt.movementY;
     }
@@ -155,7 +161,7 @@ function animate() {
   renderer.render(container);
 }
 
-},{"./globals":2,"./tools/FillTool":4,"./tools/PencilTool":5}],2:[function(require,module,exports){
+},{"./globals":2,"./tools/EraserTool":4,"./tools/FillTool":5,"./tools/PencilTool":6}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -164,7 +170,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.default = {
   currentColor: '#000',
   mmdown: false,
-  lmdown: false
+  lmdown: false,
+  container: new PIXI.Container()
 };
 
 },{}],3:[function(require,module,exports){
@@ -216,15 +223,52 @@ var _createClass = function () { function defineProperties(target, props) { for 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.EraserTool = undefined;
+
+var _PencilTool2 = require('./PencilTool');
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var EraserTool = exports.EraserTool = function (_PencilTool) {
+  _inherits(EraserTool, _PencilTool);
+
+  function EraserTool(ctx) {
+    _classCallCheck(this, EraserTool);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(EraserTool).call(this, ctx));
+  }
+
+  _createClass(EraserTool, [{
+    key: 'draw',
+    value: function draw(pos) {
+      this.ctx.clearRect(pos.x, pos.y, 1, 1);
+    }
+  }]);
+
+  return EraserTool;
+}(_PencilTool2.PencilTool);
+
+},{"./PencilTool":6}],5:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.FillTool = undefined;
 
 var _BaseTool2 = require('./BaseTool');
 
 var _globals = require('../globals');
 
-var globals = _interopRequireWildcard(_globals);
+var _globals2 = _interopRequireDefault(_globals);
 
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -260,7 +304,7 @@ var FillTool = exports.FillTool = function (_BaseTool) {
       var reachLeft = false,
           reachRight = false,
           cont = true,
-          curColor = tinycolor(globals.currentColor).toRgb();
+          curColor = tinycolor(_globals2.default.currentColor).toRgb();
 
       curColor = [curColor.r, curColor.g, curColor.b, 255];
 
@@ -281,7 +325,7 @@ var FillTool = exports.FillTool = function (_BaseTool) {
         thisPos.y += 1;
 
         while (thisPos.y < boundsBottom && this.matchStartColor(thisPos)) {
-          this.draw(thisPos, globals.currentColor);
+          this.draw(thisPos, _globals2.default.currentColor);
 
           if (thisPos.x > 0) {
             if (this.matchStartColor({ x: thisPos.x - 1, y: thisPos.y })) {
@@ -323,7 +367,7 @@ var FillTool = exports.FillTool = function (_BaseTool) {
   return FillTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3}],5:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":3}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -337,15 +381,13 @@ var _BaseTool2 = require('./BaseTool');
 
 var _globals = require('../globals');
 
-var globals = _interopRequireWildcard(_globals);
+var _globals2 = _interopRequireDefault(_globals);
 
 var _bresenham = require('bresenham');
 
 var _bresenham2 = _interopRequireDefault(_bresenham);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -371,13 +413,13 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   }, {
     key: 'onLeftMouseDown',
     value: function onLeftMouseDown(pos) {
-      this.draw(pos, globals.currentColor);
+      this.draw(pos, _globals2.default.currentColor);
       this.oldPos = pos;
     }
   }, {
     key: 'onRightMouseDown',
     value: function onRightMouseDown(pos) {
-      this.draw(pos, globals.currentColor);
+      this.draw(pos, _globals2.default.currentColor);
       this.oldPos = pos;
     }
   }, {
@@ -393,7 +435,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   }, {
     key: 'onMouseMove',
     value: function onMouseMove(pos) {
-      if (globals.lmdown && (this.oldPos.x !== pos.x || this.oldPos.y !== pos.y)) {
+      if (_globals2.default.lmdown && (this.oldPos.x !== pos.x || this.oldPos.y !== pos.y)) {
         var _iteratorNormalCompletion = true;
         var _didIteratorError = false;
         var _iteratorError = undefined;
@@ -402,7 +444,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
           for (var _iterator = (0, _bresenham2.default)(this.oldPos.x, this.oldPos.y, pos.x, pos.y)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
             var p = _step.value;
 
-            this.draw(p, globals.currentColor);
+            this.draw(p, _globals2.default.currentColor);
           }
         } catch (err) {
           _didIteratorError = true;
@@ -427,7 +469,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   return PencilTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3,"bresenham":6}],6:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":3,"bresenham":7}],7:[function(require,module,exports){
 module.exports = function(x0, y0, x1, y1, fn) {
   if(!fn) {
     var arr = [];

@@ -1,5 +1,5 @@
 import { BaseTool } from './BaseTool';
-import * as globals from '../globals'
+import globals from '../globals'
 import bresenham from 'bresenham'
 
 export class PencilTool extends BaseTool {
