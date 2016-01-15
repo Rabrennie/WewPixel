@@ -11,28 +11,19 @@ var _PencilTool = require('./tools/PencilTool');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var canvas = document.createElement('canvas');
-var ctx = canvas.getContext('2d');
-var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
-var container = new PIXI.Container();
-var docRenderer = document.body.appendChild(renderer.view);
-var docCanvas = document.body.appendChild(canvas);
-var sprite;
+var canvas = document.createElement('canvas'),
+    ctx = canvas.getContext('2d'),
+    renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
+    container = new PIXI.Container(),
+    docRenderer = document.body.appendChild(renderer.view),
+    docCanvas = document.body.appendChild(canvas),
+    c2 = document.createElement('canvas'),
+    ctx2 = c2.getContext('2d');
 
-var c2 = document.createElement('canvas');
-var ctx2 = c2.getContext('2d');
+var sprite = undefined,
+    currentTool = new _FillTool.FillTool(ctx);
 
 document.body.appendChild(c2);
-
-var currentTool = new _FillTool.FillTool(ctx);
-
-window.pencil = function () {
-  currentTool = new _PencilTool.PencilTool(ctx);
-};
-
-window.fill = function () {
-  currentTool = new _FillTool.FillTool(ctx);
-};
 
 $('#mainColor').spectrum({
   showPalette: true,
@@ -41,6 +32,14 @@ $('#mainColor').spectrum({
   move: function move(color) {
     globals.currentColor = color.toHexString(); // #ff0000
   }
+});
+
+$('#pencilBtn').click(function () {
+  currentTool = new _PencilTool.PencilTool(ctx);
+});
+
+$('#fillBtn').click(function () {
+  currentTool = new _FillTool.FillTool(ctx);
 });
 
 setup();
@@ -278,7 +277,9 @@ var FillTool = exports.FillTool = function (_BaseTool) {
         while (thisPos.y >= 0 && this.matchStartColor(thisPos)) {
           thisPos.y -= 1;
         }
+
         thisPos.y += 1;
+
         while (thisPos.y < boundsBottom && this.matchStartColor(thisPos)) {
           this.draw(thisPos, globals.currentColor);
 
