@@ -5,7 +5,7 @@ var _globals = require('./globals');
 
 var globals = _interopRequireWildcard(_globals);
 
-var _pencilTool = require('./tools/pencilTool');
+var _FillTool = require('./tools/FillTool');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -22,7 +22,7 @@ var ctx2 = c2.getContext('2d');
 
 document.body.appendChild(c2);
 
-var currentTool = new _pencilTool.pencilTool(ctx);
+var currentTool = new _FillTool.FillTool(ctx);
 
 $('#mainColor').spectrum({
   showPalette: true,
@@ -146,7 +146,7 @@ function animate() {
   renderer.render(container);
 }
 
-},{"./globals":2,"./tools/pencilTool":3}],2:[function(require,module,exports){
+},{"./globals":2,"./tools/FillTool":4}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -159,6 +159,47 @@ exports.default = {
 };
 
 },{}],3:[function(require,module,exports){
+"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BaseTool = exports.BaseTool = function () {
+  function BaseTool(ctx) {
+    _classCallCheck(this, BaseTool);
+
+    this.ctx = ctx;
+  }
+
+  _createClass(BaseTool, [{
+    key: "draw",
+    value: function draw() {}
+  }, {
+    key: "onLeftMouseDown",
+    value: function onLeftMouseDown() {}
+  }, {
+    key: "onRightMouseDown",
+    value: function onRightMouseDown() {}
+  }, {
+    key: "onLeftMouseUp",
+    value: function onLeftMouseUp() {}
+  }, {
+    key: "onRightMouseUp",
+    value: function onRightMouseUp() {}
+  }, {
+    key: "onMouseMove",
+    value: function onMouseMove() {}
+  }]);
+
+  return BaseTool;
+}();
+
+},{}],4:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -166,30 +207,32 @@ var _createClass = function () { function defineProperties(target, props) { for 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.pencilTool = undefined;
+exports.FillTool = undefined;
+
+var _BaseTool2 = require('./BaseTool');
 
 var _globals = require('../globals');
 
 var globals = _interopRequireWildcard(_globals);
 
-var _bresenham = require('bresenham');
-
-var _bresenham2 = _interopRequireDefault(_bresenham);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var pencilTool = exports.pencilTool = function () {
-  function pencilTool(ctx) {
-    _classCallCheck(this, pencilTool);
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-    this.ctx = ctx;
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var FillTool = exports.FillTool = function (_BaseTool) {
+  _inherits(FillTool, _BaseTool);
+
+  function FillTool(ctx) {
+    _classCallCheck(this, FillTool);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(FillTool).call(this, ctx));
   }
 
-  _createClass(pencilTool, [{
+  _createClass(FillTool, [{
     key: 'draw',
     value: function draw(pos, color) {
       this.ctx.fillStyle = color;
@@ -198,96 +241,63 @@ var pencilTool = exports.pencilTool = function () {
   }, {
     key: 'onLeftMouseDown',
     value: function onLeftMouseDown(pos) {
-      this.draw(pos, globals.currentColor);
-      this.oldPos = pos;
-    }
-  }, {
-    key: 'onRightMouseDown',
-    value: function onRightMouseDown(pos) {
-      this.draw(pos, globals.currentColor);
-      this.oldPos = pos;
-    }
-  }, {
-    key: 'onLeftMouseUp',
-    value: function onLeftMouseUp() {
-      this.oldPos = null;
-    }
-  }, {
-    key: 'onRightMouseUp',
-    value: function onRightMouseUp() {
-      this.oldPos = null;
-    }
-  }, {
-    key: 'onMouseMove',
-    value: function onMouseMove(pos) {
-      if (globals.lmdown && (this.oldPos.x !== pos.x || this.oldPos.y !== pos.y)) {
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+      this.startColor = this.ctx.getImageData(pos.x, pos.y, 1, 1).data;
 
-        try {
-          for (var _iterator = (0, _bresenham2.default)(this.oldPos.x, this.oldPos.y, pos.x, pos.y)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var p = _step.value;
+      var pixelStack = [pos];
+      var reachLeft = false,
+          reachRight = false;
 
-            this.draw(p, globals.currentColor);
-          }
-        } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
-        } finally {
-          try {
-            if (!_iteratorNormalCompletion && _iterator.return) {
-              _iterator.return();
-            }
-          } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
-            }
-          }
+      while (pixelStack.length) {
+        var thisPos = pixelStack.pop();
+
+        reachLeft = false;
+        reachRight = false;
+        while (thisPos.y > 0 && this.matchStartColor(thisPos)) {
+          thisPos.y -= 1;
         }
 
-        this.oldPos = pos;
+        while (thisPos.y < 20 && this.matchStartColor(thisPos)) {
+          this.draw(thisPos, globals.currentColor);
+
+          if (thisPos.x > 0) {
+            if (this.matchStartColor({ x: thisPos.x - 1, y: thisPos.y })) {
+              if (!reachLeft) {
+                pixelStack.push({ x: thisPos.x - 1, y: thisPos.y });
+                reachLeft = true;
+              } else if (reachLeft) {
+                reachLeft = false;
+              }
+            }
+          }
+
+          if (thisPos.x < 20) {
+            if (this.matchStartColor({ x: thisPos.x + 1, y: thisPos.y })) {
+
+              if (!reachRight) {
+                pixelStack.push({ x: thisPos.x + 1, y: thisPos.y });
+                reachRight = true;
+              } else if (reachRight) {
+                reachRight = false;
+              }
+            }
+          }
+          thisPos.y += 1;
+        }
       }
+    }
+  }, {
+    key: 'matchStartColor',
+    value: function matchStartColor(pos) {
+      var newColor = this.ctx.getImageData(pos.x, pos.y, 1, 1).data;
+      if (newColor.toString() === this.startColor.toString()) {
+        return true;
+      }
+      return false;
     }
   }]);
 
-  return pencilTool;
-}();
+  return FillTool;
+}(_BaseTool2.BaseTool);
 
-},{"../globals":2,"bresenham":4}],4:[function(require,module,exports){
-module.exports = function(x0, y0, x1, y1, fn) {
-  if(!fn) {
-    var arr = [];
-    fn = function(x, y) { arr.push({ x: x, y: y }); };
-  }
-  var dx = x1 - x0;
-  var dy = y1 - y0;
-  var adx = Math.abs(dx);
-  var ady = Math.abs(dy);
-  var eps = 0;
-  var sx = dx > 0 ? 1 : -1;
-  var sy = dy > 0 ? 1 : -1;
-  if(adx > ady) {
-    for(var x = x0, y = y0; sx < 0 ? x >= x1 : x <= x1; x += sx) {
-      fn(x, y);
-      eps += ady;
-      if((eps<<1) >= adx) {
-        y += sy;
-        eps -= adx;
-      }
-    }
-  } else {
-    for(var x = x0, y = y0; sy < 0 ? y >= y1 : y <= y1; y += sy) {
-      fn(x, y);
-      eps += adx;
-      if((eps<<1) >= ady) {
-        x += sx;
-        eps -= ady;
-      }
-    }
-  }
-  return arr;
-};
-
-},{}]},{},[1])
+},{"../globals":2,"./BaseTool":3}]},{},[1])
 //# sourceMappingURL=bundle.js.map
