@@ -14,6 +14,7 @@
     "PIXI": true,
     "$": true,
     "electron": true,
+    "tinycolor": true,
   },
   "rules": {
     "semi": 0,

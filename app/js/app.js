@@ -1,5 +1,6 @@
 import * as globals from './globals'
 import { FillTool } from './tools/FillTool';
+import { PencilTool } from './tools/PencilTool';
 
 const canvas = document.createElement('canvas')
 const ctx = canvas.getContext('2d');
@@ -15,7 +16,15 @@ const ctx2 = c2.getContext('2d');
 document.body.appendChild(c2)
 
 
-const currentTool = new FillTool(ctx);
+let currentTool = new FillTool(ctx);
+
+window.pencil = () => {
+  currentTool = new PencilTool(ctx)
+}
+
+window.fill = () => {
+  currentTool = new FillTool(ctx);
+}
 
 $('#mainColor').spectrum({
   showPalette: true,

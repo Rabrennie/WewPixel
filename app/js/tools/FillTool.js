@@ -12,20 +12,33 @@ export class FillTool extends BaseTool {
   onLeftMouseDown(pos) {
     this.startColor = this.ctx.getImageData(pos.x,pos.y,1,1).data;
 
-    const pixelStack = [pos];
-    let reachLeft = false,
-      reachRight = false;
+    const canvas = this.ctx.canvas,
+      boundsRight = canvas.width,
+      boundsBottom = canvas.height,
+      pixelStack = [pos];
 
-    while(pixelStack.length) {
+    let reachLeft = false,
+      reachRight = false,
+      cont = true,
+      curColor = (tinycolor(globals.currentColor)).toRgb();
+
+    curColor = [curColor.r, curColor.g, curColor.b, 255]
+
+    if(curColor.toString() === this.startColor.toString()) {
+      cont = false;
+    }
+
+    while(pixelStack.length && cont === true) {
       const thisPos = pixelStack.pop();
 
       reachLeft = false;
       reachRight = false;
-      while (thisPos.y > 0 && this.matchStartColor(thisPos)) {
+
+      while (thisPos.y >= 0 && this.matchStartColor(thisPos)) {
         thisPos.y -= 1;
       }
-
-      while (thisPos.y < 20 && this.matchStartColor(thisPos)) {
+      thisPos.y += 1
+      while (thisPos.y < boundsBottom && this.matchStartColor(thisPos)) {
         this.draw(thisPos, globals.currentColor)
 
         if(thisPos.x > 0) {
@@ -39,7 +52,7 @@ export class FillTool extends BaseTool {
           }
         }
 
-        if(thisPos.x < 20) {
+        if(thisPos.x+1 < boundsRight) {
           if(this.matchStartColor({ x:thisPos.x+1, y:thisPos.y })) {
 
             if(!reachRight) {
