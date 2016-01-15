@@ -37,7 +37,9 @@ export class FillTool extends BaseTool {
       while (thisPos.y >= 0 && this.matchStartColor(thisPos)) {
         thisPos.y -= 1;
       }
+
       thisPos.y += 1
+      
       while (thisPos.y < boundsBottom && this.matchStartColor(thisPos)) {
         this.draw(thisPos, globals.currentColor)
 

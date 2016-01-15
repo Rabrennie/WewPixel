@@ -2,29 +2,19 @@ import * as globals from './globals'
 import { FillTool } from './tools/FillTool';
 import { PencilTool } from './tools/PencilTool';
 
-const canvas = document.createElement('canvas')
-const ctx = canvas.getContext('2d');
-var renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight);
-var container = new PIXI.Container();
-const docRenderer = document.body.appendChild(renderer.view);
-const docCanvas = document.body.appendChild(canvas);
-var sprite;
+const canvas = document.createElement('canvas'),
+  ctx = canvas.getContext('2d'),
+  renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
+  container = new PIXI.Container(),
+  docRenderer = document.body.appendChild(renderer.view),
+  docCanvas = document.body.appendChild(canvas),
+  c2 = document.createElement('canvas'),
+  ctx2 = c2.getContext('2d');
 
-const c2 = document.createElement('canvas')
-const ctx2 = c2.getContext('2d');
+let sprite,
+  currentTool = new FillTool(ctx);
 
 document.body.appendChild(c2)
-
-
-let currentTool = new FillTool(ctx);
-
-window.pencil = () => {
-  currentTool = new PencilTool(ctx)
-}
-
-window.fill = () => {
-  currentTool = new FillTool(ctx);
-}
 
 $('#mainColor').spectrum({
   showPalette: true,
@@ -34,6 +24,14 @@ $('#mainColor').spectrum({
     globals.currentColor= color.toHexString(); // #ff0000
   }
 });
+
+$('#pencilBtn').click(() => {
+  currentTool = new PencilTool(ctx);
+})
+
+$('#fillBtn').click(() => {
+  currentTool = new FillTool(ctx);
+})
 
 setup()
 
