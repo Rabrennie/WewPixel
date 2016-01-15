@@ -1,9 +1,10 @@
+import { BaseTool } from './BaseTool';
 import * as globals from '../globals'
 import bresenham from 'bresenham'
 
-export class pencilTool {
+export class PencilTool extends BaseTool {
   constructor(ctx) {
-    this.ctx = ctx
+    super(ctx)
   }
   draw(pos, color) {
     this.ctx.fillStyle = color
