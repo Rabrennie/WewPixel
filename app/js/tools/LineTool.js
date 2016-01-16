@@ -11,7 +11,10 @@ export class LineTool extends BaseTool {
     this.ctx.fillRect(pos.x, pos.y,1,1);
   }
   onLeftMouseDown(pos) {
-
+    if(this.tempCtx && this.tempCtx != null) {
+      this.tempCtx.clearRect(0,0,this.canvas.width,this.canvas.height)
+      globals.container.removeChild(this.sprite);
+    }
     this.canvas = document.createElement('canvas');
     this.canvas.width = this.ctx.canvas.width;
     this.canvas.height = this.ctx.canvas.height;
@@ -33,11 +36,10 @@ export class LineTool extends BaseTool {
   }
   onLeftMouseUp() {
     this.ctx.drawImage(this.canvas, 0, 0);
+    this.tempCtx.clearRect(0,0,this.canvas.width,this.canvas.height)
     this.oldPos = null;
     globals.container.removeChild(this.sprite);
-    this.tempCtx = null;
-    this.texture = null;
-    this.sprite = null;
+    
   }
   onRightMouseUp() {
     this.oldPos = null;
