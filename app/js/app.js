@@ -11,7 +11,10 @@ const canvas = document.createElement('canvas'),
   docRenderer = document.body.appendChild(renderer.view),
   docCanvas = document.body.appendChild(canvas),
   c2 = document.createElement('canvas'),
-  ctx2 = c2.getContext('2d');
+  ctx2 = c2.getContext('2d'),
+  canvasHistory = globals.canvasHistory,
+  // WHERE WE'RE GOING WE DON'T NEED ROADS
+  canvasFuture = globals.canvasFuture;
 
 let sprite,
   currentTool = new LineTool(ctx);
@@ -43,6 +46,42 @@ $('#eraserBtn').click(() => {
 $('#lineBtn').click(() => {
   currentTool = new LineTool(ctx);
 })
+
+$(window).keydown(function(e) {
+  console.log(e)
+  if(e.keyCode === 90 && e.ctrlKey) {
+    let hist;
+    const image = new Image;
+    if(!globals.lmdown) {
+      canvasFuture.push(canvas.toDataURL());
+      hist = canvasHistory.pop();
+    }
+    if(hist) {
+      image.src = hist
+      image.onload = function() {
+        console.log(image)
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        ctx.drawImage(image, 0, 0)
+      }
+    }
+  } else if(e.keyCode === 89 && e.ctrlKey) {
+    let hist;
+    const image = new Image;
+    if(!globals.lmdown) {
+      canvasHistory.push(canvas.toDataURL());
+      hist = canvasFuture.pop();
+    }
+    if(hist) {
+      image.src = hist
+      image.onload = function() {
+        console.log(image)
+        ctx.clearRect(0,0,canvas.width,canvas.height)
+        ctx.drawImage(image, 0, 0)
+      }
+    }
+  }
+});
+
 
 setup()
 
@@ -100,6 +139,8 @@ function setup() {
   }
 
   sprite.mousedown = function(mouseData) {
+    canvasHistory.push(canvas.toDataURL());
+    canvasFuture.splice(0, canvasFuture.length);
     const pos = floorPos(mouseData.data.getLocalPosition(sprite))
     var downButton = mouseData.data.originalEvent.button;
     if(downButton === 0) {
