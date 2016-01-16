@@ -11,6 +11,8 @@ var _PencilTool = require('./tools/PencilTool');
 
 var _EraserTool = require('./tools/EraserTool');
 
+var _LineTool = require('./tools/LineTool');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var canvas = document.createElement('canvas'),
@@ -23,7 +25,7 @@ var canvas = document.createElement('canvas'),
     ctx2 = c2.getContext('2d');
 
 var sprite = undefined,
-    currentTool = new _EraserTool.EraserTool(ctx);
+    currentTool = new _LineTool.LineTool(ctx);
 
 document.body.appendChild(c2);
 
@@ -47,6 +49,10 @@ $('#fillBtn').click(function () {
 
 $('#eraserBtn').click(function () {
   currentTool = new _EraserTool.EraserTool(ctx);
+});
+
+$('#lineBtn').click(function () {
+  currentTool = new _LineTool.LineTool(ctx);
 });
 
 setup();
@@ -128,8 +134,10 @@ function setup() {
 
   container.mouseup = function (mouseData) {
     var downButton = mouseData.data.originalEvent.button;
+
     if (downButton === 0) {
       _globals2.default.lmdown = false;
+      currentTool.onLeftMouseUp();
     }
     if (downButton === 1) {
       _globals2.default.mmdown = false;
@@ -141,6 +149,7 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
       _globals2.default.lmdown = false;
+      currentTool.onLeftMouseUp();
     }
   };
 
@@ -161,7 +170,7 @@ function animate() {
   renderer.render(container);
 }
 
-},{"./globals":2,"./tools/EraserTool":4,"./tools/FillTool":5,"./tools/PencilTool":6}],2:[function(require,module,exports){
+},{"./globals":2,"./tools/EraserTool":4,"./tools/FillTool":5,"./tools/LineTool":6,"./tools/PencilTool":7}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -252,7 +261,7 @@ var EraserTool = exports.EraserTool = function (_PencilTool) {
   return EraserTool;
 }(_PencilTool2.PencilTool);
 
-},{"./PencilTool":6}],5:[function(require,module,exports){
+},{"./PencilTool":7}],5:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -375,6 +384,127 @@ var _createClass = function () { function defineProperties(target, props) { for 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+exports.LineTool = undefined;
+
+var _BaseTool2 = require('./BaseTool');
+
+var _globals = require('../globals');
+
+var _globals2 = _interopRequireDefault(_globals);
+
+var _bresenham = require('bresenham');
+
+var _bresenham2 = _interopRequireDefault(_bresenham);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LineTool = exports.LineTool = function (_BaseTool) {
+  _inherits(LineTool, _BaseTool);
+
+  function LineTool(ctx) {
+    _classCallCheck(this, LineTool);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(LineTool).call(this, ctx));
+  }
+
+  _createClass(LineTool, [{
+    key: 'draw',
+    value: function draw(pos, color) {
+      this.ctx.fillStyle = color;
+      this.ctx.fillRect(pos.x, pos.y, 1, 1);
+    }
+  }, {
+    key: 'onLeftMouseDown',
+    value: function onLeftMouseDown(pos) {
+
+      this.canvas = document.createElement('canvas');
+      this.canvas.width = this.ctx.canvas.width;
+      this.canvas.height = this.ctx.canvas.height;
+      this.tempCtx = this.canvas.getContext('2d');
+      this.texture = PIXI.Texture.fromCanvas(this.canvas);
+      this.sprite = new PIXI.Sprite(this.texture);
+      _globals2.default.container.addChild(this.sprite);
+      this.tempCtx.fillStyle = _globals2.default.currentColor;
+      this.tempCtx.fillRect(pos.x, pos.y, 1, 1);
+      this.oldPos = pos;
+
+      this.docCanvas = document.body.appendChild(this.canvas);
+      $(this.docCanvas).css({ width: '80px' });
+      $(this.docCanvas).attr('class', 'imgPreview');
+    }
+  }, {
+    key: 'onRightMouseDown',
+    value: function onRightMouseDown(pos) {
+      this.draw(pos, _globals2.default.currentColor);
+      this.oldPos = pos;
+    }
+  }, {
+    key: 'onLeftMouseUp',
+    value: function onLeftMouseUp() {
+      this.ctx.drawImage(this.canvas, 0, 0);
+      this.oldPos = null;
+      _globals2.default.container.removeChild(this.sprite);
+      this.tempCtx = null;
+      this.texture = null;
+      this.sprite = null;
+    }
+  }, {
+    key: 'onRightMouseUp',
+    value: function onRightMouseUp() {
+      this.oldPos = null;
+    }
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(pos) {
+      if (_globals2.default.lmdown && (this.oldPos.x !== pos.x || this.oldPos.y !== pos.y)) {
+        this.sprite.texture.update();
+        this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = (0, _bresenham2.default)(this.oldPos.x, this.oldPos.y, pos.x, pos.y)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var p = _step.value;
+
+            this.tempCtx.fillStyle = _globals2.default.currentColor;
+            this.tempCtx.fillRect(p.x, p.y, 1, 1);
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator.return) {
+              _iterator.return();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+      }
+    }
+  }]);
+
+  return LineTool;
+}(_BaseTool2.BaseTool);
+
+},{"../globals":2,"./BaseTool":3,"bresenham":8}],7:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
 exports.PencilTool = undefined;
 
 var _BaseTool2 = require('./BaseTool');
@@ -469,7 +599,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   return PencilTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3,"bresenham":7}],7:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":3,"bresenham":8}],8:[function(require,module,exports){
 module.exports = function(x0, y0, x1, y1, fn) {
   if(!fn) {
     var arr = [];
