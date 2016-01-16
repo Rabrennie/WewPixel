@@ -2,6 +2,7 @@ import globals from './globals'
 import { FillTool } from './tools/FillTool';
 import { PencilTool } from './tools/PencilTool';
 import { EraserTool } from './tools/EraserTool';
+import { LineTool } from './tools/LineTool';
 
 const canvas = document.createElement('canvas'),
   ctx = canvas.getContext('2d'),
@@ -13,7 +14,7 @@ const canvas = document.createElement('canvas'),
   ctx2 = c2.getContext('2d');
 
 let sprite,
-  currentTool = new EraserTool(ctx);
+  currentTool = new LineTool(ctx);
 
 document.body.appendChild(c2)
 
@@ -37,6 +38,10 @@ $('#fillBtn').click(() => {
 
 $('#eraserBtn').click(() => {
   currentTool = new EraserTool(ctx);
+})
+
+$('#lineBtn').click(() => {
+  currentTool = new LineTool(ctx);
 })
 
 setup()
@@ -119,8 +124,10 @@ function setup() {
 
   container.mouseup = function(mouseData) {
     var downButton = mouseData.data.originalEvent.button
+
     if(downButton === 0) {
       globals.lmdown = false;
+      currentTool.onLeftMouseUp();
     }
     if(downButton === 1) {
       globals.mmdown = false;
@@ -132,6 +139,7 @@ function setup() {
     var downButton = mouseData.data.originalEvent.button
     if(downButton === 0) {
       globals.lmdown = false;
+      currentTool.onLeftMouseUp();
     }
   }
 
