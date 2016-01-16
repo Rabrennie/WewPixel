@@ -422,7 +422,10 @@ var LineTool = exports.LineTool = function (_BaseTool) {
   }, {
     key: 'onLeftMouseDown',
     value: function onLeftMouseDown(pos) {
-
+      if (this.tempCtx && this.tempCtx != null) {
+        this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        _globals2.default.container.removeChild(this.sprite);
+      }
       this.canvas = document.createElement('canvas');
       this.canvas.width = this.ctx.canvas.width;
       this.canvas.height = this.ctx.canvas.height;
@@ -448,11 +451,9 @@ var LineTool = exports.LineTool = function (_BaseTool) {
     key: 'onLeftMouseUp',
     value: function onLeftMouseUp() {
       this.ctx.drawImage(this.canvas, 0, 0);
+      this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.oldPos = null;
       _globals2.default.container.removeChild(this.sprite);
-      this.tempCtx = null;
-      this.texture = null;
-      this.sprite = null;
     }
   }, {
     key: 'onRightMouseUp',
