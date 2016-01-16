@@ -22,7 +22,11 @@ var canvas = document.createElement('canvas'),
     docRenderer = document.body.appendChild(renderer.view),
     docCanvas = document.body.appendChild(canvas),
     c2 = document.createElement('canvas'),
-    ctx2 = c2.getContext('2d');
+    ctx2 = c2.getContext('2d'),
+    canvasHistory = _globals2.default.canvasHistory,
+
+// WHERE WE'RE GOING WE DON'T NEED ROADS
+canvasFuture = _globals2.default.canvasFuture;
 
 var sprite = undefined,
     currentTool = new _LineTool.LineTool(ctx);
@@ -53,6 +57,45 @@ $('#eraserBtn').click(function () {
 
 $('#lineBtn').click(function () {
   currentTool = new _LineTool.LineTool(ctx);
+});
+
+$(window).keydown(function (e) {
+  console.log(e);
+  if (e.keyCode === 90 && e.ctrlKey) {
+    (function () {
+      var hist = undefined;
+      var image = new Image();
+      if (!_globals2.default.lmdown) {
+        canvasFuture.push(canvas.toDataURL());
+        hist = canvasHistory.pop();
+      }
+      if (hist) {
+        image.src = hist;
+        image.onload = function () {
+          console.log(image);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0);
+        };
+      }
+    })();
+  } else if (e.keyCode === 89 && e.ctrlKey) {
+    (function () {
+      var hist = undefined;
+      var image = new Image();
+      if (!_globals2.default.lmdown) {
+        canvasHistory.push(canvas.toDataURL());
+        hist = canvasFuture.pop();
+      }
+      if (hist) {
+        image.src = hist;
+        image.onload = function () {
+          console.log(image);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(image, 0, 0);
+        };
+      }
+    })();
+  }
 });
 
 setup();
@@ -110,6 +153,8 @@ function setup() {
   }
 
   sprite.mousedown = function (mouseData) {
+    canvasHistory.push(canvas.toDataURL());
+    canvasFuture.splice(0, canvasFuture.length);
     var pos = floorPos(mouseData.data.getLocalPosition(sprite));
     var downButton = mouseData.data.originalEvent.button;
     if (downButton === 0) {
@@ -180,7 +225,9 @@ exports.default = {
   currentColor: '#000',
   mmdown: false,
   lmdown: false,
-  container: new PIXI.Container()
+  container: new PIXI.Container(),
+  canvasHistory: [],
+  canvasFuture: []
 };
 
 },{}],3:[function(require,module,exports){
@@ -454,6 +501,7 @@ var LineTool = exports.LineTool = function (_BaseTool) {
       this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       this.oldPos = null;
       _globals2.default.container.removeChild(this.sprite);
+      $(this.docCanvas).remove();
     }
   }, {
     key: 'onRightMouseUp',
