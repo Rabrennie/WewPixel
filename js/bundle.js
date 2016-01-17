@@ -69,7 +69,16 @@ $('#lineBtn').click(function () {
 
 var keyBindings = {
   66: function _() {
-    currentTool = new _PencilTool.PencilTool(ctx);
+    if (!_globals2.default.lmdown) currentTool = new _PencilTool.PencilTool(ctx);
+  },
+  69: function _() {
+    if (!_globals2.default.lmdown) currentTool = new _EraserTool.EraserTool(ctx);
+  },
+  70: function _() {
+    if (!_globals2.default.lmdown) currentTool = new _FillTool.FillTool(ctx);
+  },
+  76: function _() {
+    if (!_globals2.default.lmdown) currentTool = new _LineTool.LineTool(ctx);
   },
   90: function _(e) {
     if (e.ctrlKey) {
@@ -249,7 +258,6 @@ var redo = function redo() {
   if (hist) {
     image.src = hist;
     image.onload = function () {
-      console.log(image);
       _globals2.default.ctx.clearRect(0, 0, _globals2.default.canvas.width, _globals2.default.canvas.height);
       _globals2.default.ctx.drawImage(image, 0, 0);
     };
@@ -556,8 +564,10 @@ var LineTool = exports.LineTool = function (_BaseTool) {
   }, {
     key: 'onLeftMouseUp',
     value: function onLeftMouseUp() {
-      this.ctx.drawImage(this.canvas, 0, 0);
-      this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      if (this.canvas) {
+        this.ctx.drawImage(this.canvas, 0, 0);
+        this.tempCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+      }
       this.oldPos = null;
       _globals2.default.container.removeChild(this.sprite);
       $(this.docCanvas).remove();
