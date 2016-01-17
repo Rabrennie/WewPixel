@@ -3,9 +3,11 @@ import { FillTool } from './tools/FillTool';
 import { PencilTool } from './tools/PencilTool';
 import { EraserTool } from './tools/EraserTool';
 import { LineTool } from './tools/LineTool';
+import redo from './helpers/redo'
+import undo from './helpers/undo'
 
-const canvas = document.createElement('canvas'),
-  ctx = canvas.getContext('2d'),
+const canvas = globals.canvas,
+  ctx = globals.ctx,
   renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
   container = globals.container,
   docRenderer = document.body.appendChild(renderer.view),
@@ -47,38 +49,16 @@ $('#lineBtn').click(() => {
   currentTool = new LineTool(ctx);
 })
 
+const keyBindings = {
+  66: () => { currentTool = new PencilTool(ctx); },
+  90: (e) => { if(e.ctrlKey) { undo() } },
+  89: (e) => { if(e.ctrlKey) { redo() } }
+}
+
 $(window).keydown(function(e) {
   console.log(e)
-  if(e.keyCode === 90 && e.ctrlKey) {
-    let hist;
-    const image = new Image;
-    if(!globals.lmdown) {
-      canvasFuture.push(canvas.toDataURL());
-      hist = canvasHistory.pop();
-    }
-    if(hist) {
-      image.src = hist
-      image.onload = function() {
-        console.log(image)
-        ctx.clearRect(0,0,canvas.width,canvas.height)
-        ctx.drawImage(image, 0, 0)
-      }
-    }
-  } else if(e.keyCode === 89 && e.ctrlKey) {
-    let hist;
-    const image = new Image;
-    if(!globals.lmdown) {
-      canvasHistory.push(canvas.toDataURL());
-      hist = canvasFuture.pop();
-    }
-    if(hist) {
-      image.src = hist
-      image.onload = function() {
-        console.log(image)
-        ctx.clearRect(0,0,canvas.width,canvas.height)
-        ctx.drawImage(image, 0, 0)
-      }
-    }
+  if(keyBindings[e.keyCode]) {
+    keyBindings[e.keyCode](e);
   }
 });
 

@@ -13,10 +13,18 @@ var _EraserTool = require('./tools/EraserTool');
 
 var _LineTool = require('./tools/LineTool');
 
+var _redo = require('./helpers/redo');
+
+var _redo2 = _interopRequireDefault(_redo);
+
+var _undo = require('./helpers/undo');
+
+var _undo2 = _interopRequireDefault(_undo);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var canvas = document.createElement('canvas'),
-    ctx = canvas.getContext('2d'),
+var canvas = _globals2.default.canvas,
+    ctx = _globals2.default.ctx,
     renderer = PIXI.autoDetectRenderer(window.innerWidth, window.innerHeight),
     container = _globals2.default.container,
     docRenderer = document.body.appendChild(renderer.view),
@@ -59,42 +67,26 @@ $('#lineBtn').click(function () {
   currentTool = new _LineTool.LineTool(ctx);
 });
 
+var keyBindings = {
+  66: function _() {
+    currentTool = new _PencilTool.PencilTool(ctx);
+  },
+  90: function _(e) {
+    if (e.ctrlKey) {
+      (0, _undo2.default)();
+    }
+  },
+  89: function _(e) {
+    if (e.ctrlKey) {
+      (0, _redo2.default)();
+    }
+  }
+};
+
 $(window).keydown(function (e) {
   console.log(e);
-  if (e.keyCode === 90 && e.ctrlKey) {
-    (function () {
-      var hist = undefined;
-      var image = new Image();
-      if (!_globals2.default.lmdown) {
-        canvasFuture.push(canvas.toDataURL());
-        hist = canvasHistory.pop();
-      }
-      if (hist) {
-        image.src = hist;
-        image.onload = function () {
-          console.log(image);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(image, 0, 0);
-        };
-      }
-    })();
-  } else if (e.keyCode === 89 && e.ctrlKey) {
-    (function () {
-      var hist = undefined;
-      var image = new Image();
-      if (!_globals2.default.lmdown) {
-        canvasHistory.push(canvas.toDataURL());
-        hist = canvasFuture.pop();
-      }
-      if (hist) {
-        image.src = hist;
-        image.onload = function () {
-          console.log(image);
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.drawImage(image, 0, 0);
-        };
-      }
-    })();
+  if (keyBindings[e.keyCode]) {
+    keyBindings[e.keyCode](e);
   }
 });
 
@@ -215,22 +207,89 @@ function animate() {
   renderer.render(container);
 }
 
-},{"./globals":2,"./tools/EraserTool":4,"./tools/FillTool":5,"./tools/LineTool":6,"./tools/PencilTool":7}],2:[function(require,module,exports){
+},{"./globals":2,"./helpers/redo":3,"./helpers/undo":4,"./tools/EraserTool":6,"./tools/FillTool":7,"./tools/LineTool":8,"./tools/PencilTool":9}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
+var canvas = document.createElement('canvas');
+
 exports.default = {
   currentColor: '#000',
   mmdown: false,
   lmdown: false,
   container: new PIXI.Container(),
   canvasHistory: [],
-  canvasFuture: []
+  canvasFuture: [],
+  canvas: canvas,
+  ctx: canvas.getContext('2d')
 };
 
 },{}],3:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _globals = require('../globals');
+
+var _globals2 = _interopRequireDefault(_globals);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var redo = function redo() {
+  var hist = undefined;
+  var image = new Image();
+  if (!_globals2.default.lmdown) {
+    _globals2.default.canvasHistory.push(_globals2.default.canvas.toDataURL());
+    hist = _globals2.default.canvasFuture.pop();
+  }
+  if (hist) {
+    image.src = hist;
+    image.onload = function () {
+      console.log(image);
+      _globals2.default.ctx.clearRect(0, 0, _globals2.default.canvas.width, _globals2.default.canvas.height);
+      _globals2.default.ctx.drawImage(image, 0, 0);
+    };
+  }
+};
+
+exports.default = redo;
+
+},{"../globals":2}],4:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _globals = require('../globals');
+
+var _globals2 = _interopRequireDefault(_globals);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var undo = function undo() {
+  var hist = undefined;
+  var image = new Image();
+  if (!_globals2.default.lmdown) {
+    _globals2.default.canvasFuture.push(_globals2.default.canvas.toDataURL());
+    hist = _globals2.default.canvasHistory.pop();
+  }
+  if (hist) {
+    image.src = hist;
+    image.onload = function () {
+      _globals2.default.ctx.clearRect(0, 0, _globals2.default.canvas.width, _globals2.default.canvas.height);
+      _globals2.default.ctx.drawImage(image, 0, 0);
+    };
+  }
+};
+
+exports.default = undo;
+
+},{"../globals":2}],5:[function(require,module,exports){
 "use strict";
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -271,7 +330,7 @@ var BaseTool = exports.BaseTool = function () {
   return BaseTool;
 }();
 
-},{}],4:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -308,7 +367,7 @@ var EraserTool = exports.EraserTool = function (_PencilTool) {
   return EraserTool;
 }(_PencilTool2.PencilTool);
 
-},{"./PencilTool":7}],5:[function(require,module,exports){
+},{"./PencilTool":9}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -423,7 +482,7 @@ var FillTool = exports.FillTool = function (_BaseTool) {
   return FillTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3}],6:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":5}],8:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -546,7 +605,7 @@ var LineTool = exports.LineTool = function (_BaseTool) {
   return LineTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3,"bresenham":8}],7:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":5,"bresenham":10}],9:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -648,7 +707,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   return PencilTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":3,"bresenham":8}],8:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":5,"bresenham":10}],10:[function(require,module,exports){
 module.exports = function(x0, y0, x1, y1, fn) {
   if(!fn) {
     var arr = [];
