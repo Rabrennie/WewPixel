@@ -50,7 +50,10 @@ $('#lineBtn').click(() => {
 })
 
 const keyBindings = {
-  66: () => { currentTool = new PencilTool(ctx); },
+  66: () => { if(!globals.lmdown) currentTool = new PencilTool(ctx); },
+  69: () => { if(!globals.lmdown) currentTool = new EraserTool(ctx); },
+  70: () => { if(!globals.lmdown) currentTool = new FillTool(ctx); },
+  76: () => { if(!globals.lmdown) currentTool = new LineTool(ctx); },
   90: (e) => { if(e.ctrlKey) { undo() } },
   89: (e) => { if(e.ctrlKey) { redo() } }
 }

@@ -35,8 +35,10 @@ export class LineTool extends BaseTool {
     this.oldPos = pos;
   }
   onLeftMouseUp() {
-    this.ctx.drawImage(this.canvas, 0, 0);
-    this.tempCtx.clearRect(0,0,this.canvas.width,this.canvas.height)
+    if(this.canvas) {
+      this.ctx.drawImage(this.canvas, 0, 0);
+      this.tempCtx.clearRect(0,0,this.canvas.width,this.canvas.height)
+    }
     this.oldPos = null;
     globals.container.removeChild(this.sprite);
     $(this.docCanvas).remove()

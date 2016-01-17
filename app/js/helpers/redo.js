@@ -10,7 +10,6 @@ const redo = () => {
   if(hist) {
     image.src = hist
     image.onload = function() {
-      console.log(image)
       globals.ctx.clearRect(0,0,globals.canvas.width,globals.canvas.height)
       globals.ctx.drawImage(image, 0, 0)
     }
