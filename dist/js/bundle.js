@@ -13,6 +13,8 @@ var _EraserTool = require('./tools/EraserTool');
 
 var _LineTool = require('./tools/LineTool');
 
+var _MoveTool = require('./tools/MoveTool');
+
 var _redo = require('./helpers/redo');
 
 var _redo2 = _interopRequireDefault(_redo);
@@ -37,7 +39,7 @@ var canvas = _globals2.default.canvas,
 canvasFuture = _globals2.default.canvasFuture;
 
 var sprite = undefined,
-    currentTool = new _LineTool.LineTool(ctx);
+    currentTool = new _MoveTool.MoveTool(ctx);
 
 document.body.appendChild(c2);
 
@@ -65,6 +67,10 @@ $('#eraserBtn').click(function () {
 
 $('#lineBtn').click(function () {
   currentTool = new _LineTool.LineTool(ctx);
+});
+
+$('#moveBtn').click(function () {
+  currentTool = new _MoveTool.MoveTool(ctx);
 });
 
 var keyBindings = {
@@ -166,7 +172,7 @@ function setup() {
 
   sprite.mousemove = function (mouseData) {
     var pos = floorPos(mouseData.data.getLocalPosition(sprite));
-    currentTool.onMouseMove(pos);
+    currentTool.onMouseMove(pos, mouseData.data.originalEvent);
   };
 
   container.mousedown = function (mouseData) {
@@ -216,7 +222,7 @@ function animate() {
   renderer.render(container);
 }
 
-},{"./globals":2,"./helpers/redo":3,"./helpers/undo":4,"./tools/EraserTool":6,"./tools/FillTool":7,"./tools/LineTool":8,"./tools/PencilTool":9}],2:[function(require,module,exports){
+},{"./globals":2,"./helpers/redo":3,"./helpers/undo":4,"./tools/EraserTool":6,"./tools/FillTool":7,"./tools/LineTool":8,"./tools/MoveTool":9,"./tools/PencilTool":10}],2:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -375,7 +381,7 @@ var EraserTool = exports.EraserTool = function (_PencilTool) {
   return EraserTool;
 }(_PencilTool2.PencilTool);
 
-},{"./PencilTool":9}],7:[function(require,module,exports){
+},{"./PencilTool":10}],7:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -615,7 +621,63 @@ var LineTool = exports.LineTool = function (_BaseTool) {
   return LineTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":5,"bresenham":10}],9:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":5,"bresenham":11}],9:[function(require,module,exports){
+'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.MoveTool = undefined;
+
+var _BaseTool2 = require('./BaseTool');
+
+var _globals = require('../globals');
+
+var _globals2 = _interopRequireDefault(_globals);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var MoveTool = exports.MoveTool = function (_BaseTool) {
+  _inherits(MoveTool, _BaseTool);
+
+  function MoveTool(ctx) {
+    _classCallCheck(this, MoveTool);
+
+    return _possibleConstructorReturn(this, Object.getPrototypeOf(MoveTool).call(this, ctx));
+  }
+
+  _createClass(MoveTool, [{
+    key: 'onLeftMouseDown',
+    value: function onLeftMouseDown() {
+      $('html').css({ cursor: '-webkit-grabbing' });
+    }
+  }, {
+    key: 'onLeftMouseUp',
+    value: function onLeftMouseUp() {
+      $('html').css({ cursor: 'default' });
+    }
+  }, {
+    key: 'onMouseMove',
+    value: function onMouseMove(pos, mouseEvt) {
+      if (_globals2.default.lmdown) {
+        _globals2.default.container.x += mouseEvt.movementX;
+        _globals2.default.container.y += mouseEvt.movementY;
+      }
+    }
+  }]);
+
+  return MoveTool;
+}(_BaseTool2.BaseTool);
+
+},{"../globals":2,"./BaseTool":5}],10:[function(require,module,exports){
 'use strict';
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
@@ -717,7 +779,7 @@ var PencilTool = exports.PencilTool = function (_BaseTool) {
   return PencilTool;
 }(_BaseTool2.BaseTool);
 
-},{"../globals":2,"./BaseTool":5,"bresenham":10}],10:[function(require,module,exports){
+},{"../globals":2,"./BaseTool":5,"bresenham":11}],11:[function(require,module,exports){
 module.exports = function(x0, y0, x1, y1, fn) {
   if(!fn) {
     var arr = [];

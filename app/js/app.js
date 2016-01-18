@@ -3,6 +3,7 @@ import { FillTool } from './tools/FillTool';
 import { PencilTool } from './tools/PencilTool';
 import { EraserTool } from './tools/EraserTool';
 import { LineTool } from './tools/LineTool';
+import { MoveTool } from './tools/MoveTool';
 import redo from './helpers/redo'
 import undo from './helpers/undo'
 
@@ -19,7 +20,7 @@ const canvas = globals.canvas,
   canvasFuture = globals.canvasFuture;
 
 let sprite,
-  currentTool = new LineTool(ctx);
+  currentTool = new MoveTool(ctx);
 
 document.body.appendChild(c2)
 
@@ -47,6 +48,10 @@ $('#eraserBtn').click(() => {
 
 $('#lineBtn').click(() => {
   currentTool = new LineTool(ctx);
+})
+
+$('#moveBtn').click(() => {
+  currentTool = new MoveTool(ctx);
 })
 
 const keyBindings = {
@@ -134,7 +139,7 @@ function setup() {
 
   sprite.mousemove = function(mouseData) {
     const pos = floorPos(mouseData.data.getLocalPosition(sprite))
-    currentTool.onMouseMove(pos);
+    currentTool.onMouseMove(pos, mouseData.data.originalEvent);
   }
 
   container.mousedown = function(mouseData) {
