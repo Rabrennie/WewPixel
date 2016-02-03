@@ -107,9 +107,12 @@ $(window).keydown(function (e) {
 
 $('canvas').bind('mousewheel', function (e) {
   console.log(e.originalEvent);
-  container.scale.y = container.scale.y - e.originalEvent.wheelDeltaY / 120;
-  container.scale.x = container.scale.x - e.originalEvent.wheelDeltaY / 120;
-  console.log(container.scale);
+  var newScale = container.scale.x - e.originalEvent.wheelDeltaY / 120;
+
+  if (newScale > 0) {
+    container.scale.y = newScale;
+    container.scale.x = newScale;
+  }
 });
 
 setup();
